@@ -52,7 +52,7 @@ function love.load()
   }
   -- "quad" is a LÖVE Quad.
   -- The cordinates will correspond to the relative position of the image inside the atlas.
-  local quads = {
+  quads = {
     imageProxies[1]:newQuad(0, 0, 16, 32),
     imageProxies[2]:newQuad(0, 0, 24, 40),
     imageProxies[3]:newQuad(0, 0, 16, 16),

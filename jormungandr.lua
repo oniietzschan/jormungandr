@@ -37,23 +37,34 @@ local ImageMetaTable = {
 
 
 
-function Jormungandr:init()
+function Jormungandr:init(dimensions)
+  assert(type(dimensions) == 'nil' or type(dimensions) == 'number')
+  self._dimensions = dimensions or 1024
+  self._atlasImageData = love.image.newImageData(self._dimensions, self._dimensions)
+  self._x = 0
+  self._y = 0
   self._images = {}
 end
 
 function Jormungandr:getAtlasImage()
+  if self._atlasImage == nil then
+    self._atlasImage = love.graphics.newImage(self._atlasImageData)
+  end
   return self._atlasImage
 end
 
-function Jormungandr:newImage(path)
-  assert(self._atlasImage == nil, 'todo...')
-  self._atlasImage = love.graphics.newImage(path)
+function Jormungandr:newImage(filename)
+  local imageData = love.image.newImageData(filename)
+  local w, h = imageData:getDimensions()
+  self._atlasImageData:paste(imageData, self._x, self._y, 0, 0, w, h)
 
   local image = setmetatable({}, ImageMetaTable)
-  local w, h = self._atlasImage:getDimensions()
-  image:init(0, 0, w, h)
-  image:setAtlasDimensions(w, h)
+  image:init(self._x, 0, w, h)
+  image:setAtlasDimensions(self._dimensions, self._dimensions)
   table.insert(self._images, image)
+
+  self._x = self._x + w
+
   return image
 end
 

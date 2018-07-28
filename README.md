@@ -3,6 +3,8 @@ Jörmungandr
 
 Just-in-time sprite atlas for LÖVE. (In Dev!)
 
+![a photograph of a man elaborately manipulating his rectum with both hands](https://i.imgur.com/tyweg7k.png)
+
 Example Without Jörmungandr
 ---------------------------
 

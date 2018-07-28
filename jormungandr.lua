@@ -26,10 +26,61 @@ local Jormungandr = {
     SOFTWARE. PLEASE HAVE A FUN AND BE GENTLE WITH THIS SOFTWARE.
   ]]
 }
-
 local JormungandrMetaTable = {
   __index = Jormungandr,
-  __call = Jormungandr.__call,
 }
 
-return function() return setmetatable({}, JormungandrMetaTable) end
+local Image = {}
+local ImageMetaTable = {
+  __index = Image,
+}
+
+
+
+function Jormungandr:init()
+  self._images = {}
+end
+
+function Jormungandr:getAtlasImage()
+  return self._atlasImage
+end
+
+function Jormungandr:newImage(path)
+  assert(self._atlasImage == nil, 'todo...')
+  self._atlasImage = love.graphics.newImage(path)
+
+  local image = setmetatable({}, ImageMetaTable)
+  local w, h = self._atlasImage:getDimensions()
+  image:init(0, 0, w, h)
+  image:setAtlasDimensions(w, h)
+  table.insert(self._images, image)
+  return image
+end
+
+
+
+function Image:init(x, y, w, h)
+  self._x = x
+  self._y = y
+  self._w = w
+  self._h = h
+end
+
+function Image:setAtlasDimensions(w, h)
+  self._atlasW = w
+  self._atlasH = h
+  return self
+end
+
+function Image:newQuad(x, y, w, h)
+  local quad = love.graphics.newQuad(self._x + x, self._y + y, w, h, self._atlasW, self._atlasH)
+  return quad
+end
+
+
+
+return function()
+  local libraryInstance = setmetatable({}, JormungandrMetaTable)
+  libraryInstance:init()
+  return libraryInstance
+end

@@ -43,6 +43,7 @@ function Jormungandr:init(dimensions)
   self._atlasImageData = love.image.newImageData(self._dimensions, self._dimensions)
   self._x = 0
   self._y = 0
+  self._nextY = 0
   self._images = {}
 end
 
@@ -56,14 +57,23 @@ end
 function Jormungandr:newImage(filename)
   local imageData = love.image.newImageData(filename)
   local w, h = imageData:getDimensions()
+
+  -- Check if there is space.
+  if self._x + w > self._dimensions then
+    self._x = 0
+    self._y = self._nextY
+  end
+  assert(w <= self._dimensions or h + self._y <= self._dimensions)
+
   self._atlasImageData:paste(imageData, self._x, self._y, 0, 0, w, h)
 
   local image = setmetatable({}, ImageMetaTable)
-  image:init(self._x, 0, w, h)
+  image:init(self._x, self._y, w, h)
   image:setAtlasDimensions(self._dimensions, self._dimensions)
   table.insert(self._images, image)
 
   self._x = self._x + w
+  self._nextY = math.max(self._nextY, self._y + h)
 
   return image
 end
@@ -90,8 +100,8 @@ end
 
 
 
-return function()
+return function(...)
   local libraryInstance = setmetatable({}, JormungandrMetaTable)
-  libraryInstance:init()
+  libraryInstance:init(...)
   return libraryInstance
 end

@@ -1,4 +1,6 @@
-local Akari = require 'jormungandr'(380)
+local Akari = require 'jormungandr'(128)
+
+io.stdout:setvbuf("no")
 
 local demo = {}
 

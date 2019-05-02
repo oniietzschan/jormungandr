@@ -9,24 +9,26 @@ function Space:initialize(width, height)
   assertDimensions(width, height)
   self._width = width
   self._height = height
-  self._x = 0
-  self._y = 0
-  self._nextY = 0
   self._objs = {}
   return self
 end
 
 function Space:add(obj, width, height)
   assertDimensions(width, height)
-  table.insert(self._objs, {
+  local nextIndex = #self._objs + 1
+  self._objs[nextIndex] = {
     obj = obj,
     width = width,
     height = height,
-  })
+    index = nextIndex,
+  }
 end
 
 local function sortHeightWidth(a, b)
   if a.height == b.height then
+    if a.width == b.width then
+      return a.index < b.index
+    end
     return a.width > b.width
   end
   return a.height > b.height
@@ -59,7 +61,7 @@ local function park(unfilteredObjs, width, height)
       -- Go to the next row if there's not enough room.
       x = 0
       y = y + rowH
-      rowH = 0
+      rowH = obj.height
     end
 
     table.insert(results, {

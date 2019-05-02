@@ -77,6 +77,7 @@ function Jormungandr:_createAtlas()
     atlasImageData:paste(obj.imageData, x, y, obj.x, obj.y, w, h)
     obj.quad:setViewport(x, y, w, h)
   end
+  self._filePathToImageData = {} -- Clear so that imageData can be freed from memory.
   return love.graphics.newImage(atlasImageData)
 end
 

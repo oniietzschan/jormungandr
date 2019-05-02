@@ -6,14 +6,23 @@ local demo = {}
 
 local DATA = {
   ['demo/player.png'] = {
-    {0, 0, 19, 19},
+    { 0, 0, 19, 19},
+    {19, 0, 19, 19},
+    {38, 0, 19, 19},
+    {57, 0, 19, 19},
+    {76, 0, 19, 19},
+    {95, 0, 19, 19},
   },
   ['demo/bullet.png'] = {
     {0, 0, 9, 9},
+    {9, 0, 9, 9},
   },
   ['demo/jelly.png'] = {
-    {0, 0, 18, 16},
-    -- {36, 0, 18, 16},
+    { 0, 0, 18, 16},
+    {18, 0, 18, 16},
+    {36, 0, 18, 16},
+    {54, 0, 18, 16},
+    {72, 0, 18, 16},
   },
 }
 
@@ -42,11 +51,11 @@ end
 
 function demo.initJormungandrDrawCalls()
   local quads = {}
+
   for filename, quadParamSets in pairs(DATA) do
-    local imageProxy = Akari:newImage(filename)
     for _, quadParams in ipairs(quadParamSets) do
       local x, y, w, h = unpack(quadParams)
-      local quad = imageProxy:newQuad(x, y, w, h)
+      local quad = Akari:newQuad(filename, x, y, w, h)
       table.insert(quads, quad)
     end
   end

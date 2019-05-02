@@ -26,79 +26,59 @@ local Jormungandr = {
     SOFTWARE. PLEASE HAVE A FUN AND BE GENTLE WITH THIS SOFTWARE.
   ]]
 }
-local JormungandrMetaTable = {
-  __index = Jormungandr,
-}
-
-local Image = {}
-local ImageMetaTable = {
-  __index = Image,
-}
-
-
 
 function Jormungandr:init(dimensions)
   assert(type(dimensions) == 'nil' or type(dimensions) == 'number')
   self._dimensions = dimensions or 1024
-  self._atlasImageData = love.image.newImageData(self._dimensions, self._dimensions)
   self._x = 0
   self._y = 0
   self._nextY = 0
   self._images = {}
+  self._filePathToImageData = {}
+  local Valet = require 'valet'
+  self._valetSpace = Valet(self._dimensions, self._dimensions)
+end
+
+function Jormungandr:newQuad(image, x, y, w, h)
+  if type(image) == 'string' then
+    if self._filePathToImageData[image] == nil then
+      self._filePathToImageData[image] = love.image.newImageData(image)
+    end
+    imageData = self._filePathToImageData[image]
+  else
+    error('must pass in image as path')
+  end
+  local quad = love.graphics.newQuad(0, 0, w, h, self._dimensions, self._dimensions)
+  local obj = {
+    imageData = imageData,
+    quad = quad,
+    x = x,
+    y = y,
+  }
+  self._valetSpace:add(obj, w, h)
+  return quad
 end
 
 function Jormungandr:getAtlasImage()
   if self._atlasImage == nil then
-    self._atlasImage = love.graphics.newImage(self._atlasImageData)
+    self._atlasImage = self:_createAtlas()
   end
   return self._atlasImage
 end
 
-function Jormungandr:newImage(filename)
-  local imageData = love.image.newImageData(filename)
-  local w, h = imageData:getDimensions()
-
-  -- Check if there is space.
-  if self._x + w > self._dimensions then
-    self._x = 0
-    self._y = self._nextY
+function Jormungandr:_createAtlas()
+  local atlasImageData = love.image.newImageData(self._dimensions, self._dimensions)
+  for _, t in ipairs(self._valetSpace:yield()) do
+    local obj, x, y, w, h = unpack(t)
+    atlasImageData:paste(obj.imageData, x, y, obj.x, obj.y, w, h)
+    obj.quad:setViewport(x, y, w, h)
   end
-  assert(w <= self._dimensions or h + self._y <= self._dimensions)
-
-  self._atlasImageData:paste(imageData, self._x, self._y, 0, 0, w, h)
-
-  local image = setmetatable({}, ImageMetaTable)
-  image:init(self._x, self._y, w, h)
-  image:setAtlasDimensions(self._dimensions, self._dimensions)
-  table.insert(self._images, image)
-
-  self._x = self._x + w
-  self._nextY = math.max(self._nextY, self._y + h)
-
-  return image
+  return love.graphics.newImage(atlasImageData)
 end
 
-
-
-function Image:init(x, y, w, h)
-  self._x = x
-  self._y = y
-  self._w = w
-  self._h = h
-end
-
-function Image:setAtlasDimensions(w, h)
-  self._atlasW = w
-  self._atlasH = h
-  return self
-end
-
-function Image:newQuad(x, y, w, h)
-  local quad = love.graphics.newQuad(self._x + x, self._y + y, w, h, self._atlasW, self._atlasH)
-  return quad
-end
-
-
+local JormungandrMetaTable = {
+  __index = Jormungandr,
+}
 
 return function(...)
   local libraryInstance = setmetatable({}, JormungandrMetaTable)

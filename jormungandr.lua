@@ -28,7 +28,7 @@ local Jormungandr = {
 }
 
 function Jormungandr:init(dimensions)
-  assert(type(dimensions) == 'nil' or type(dimensions) == 'number')
+  assert(type(dimensions) == 'number' or dimensions == nil)
   self._dimensions = dimensions or 1024
   self._x = 0
   self._y = 0
@@ -36,10 +36,14 @@ function Jormungandr:init(dimensions)
   self._images = {}
   self._filePathToImageData = {}
   local Valet = require 'valet'
-  self._valetSpace = Valet(self._dimensions, self._dimensions)
+  self._valet = Valet(self._dimensions, self._dimensions)
 end
 
 function Jormungandr:newQuad(image, x, y, w, h)
+  if self._atlasImage then
+    error('newQuad() should be called before getAtlasImage()')
+  end
+
   if type(image) == 'string' then
     if self._filePathToImageData[image] == nil then
       self._filePathToImageData[image] = love.image.newImageData(image)
@@ -48,14 +52,17 @@ function Jormungandr:newQuad(image, x, y, w, h)
   else
     error('must pass in image as path')
   end
+
   local quad = love.graphics.newQuad(0, 0, w, h, self._dimensions, self._dimensions)
+
   local obj = {
     imageData = imageData,
     quad = quad,
     x = x,
     y = y,
   }
-  self._valetSpace:add(obj, w, h)
+  self._valet:add(obj, w, h)
+
   return quad
 end
 
@@ -68,7 +75,7 @@ end
 
 function Jormungandr:_createAtlas()
   local atlasImageData = love.image.newImageData(self._dimensions, self._dimensions)
-  for _, t in ipairs(self._valetSpace:yield()) do
+  for _, t in ipairs(self._valet:yield()) do
     local obj, x, y, w, h = unpack(t)
     atlasImageData:paste(obj.imageData, x, y, obj.x, obj.y, w, h)
     obj.quad:setViewport(x, y, w, h)

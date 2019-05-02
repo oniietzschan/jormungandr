@@ -71,6 +71,8 @@ local WHITE = {1, 1, 1}
 local DARK_BLUE = {0.15, 0.15, 0.25}
 local MED_BLUE = {0.25, 0.25, 0.4}
 
+local TOP_HEIGHT = 100
+
 function love.draw()
   love.graphics.scale(2, 2)
   love.graphics.setColor(DARK_BLUE)
@@ -84,18 +86,21 @@ function love.draw()
   love.graphics.pop()
 
   love.graphics.push()
-  love.graphics.translate(10, 190)
+  love.graphics.translate(10, TOP_HEIGHT + 20)
   love.graphics.setColor(MED_BLUE)
-  love.graphics.rectangle('fill', 0, 0, 380, 100)
+  love.graphics.rectangle('fill', 0, 0, 380, 170)
   love.graphics.setColor(WHITE)
   love.graphics.print('Texture Atlas', 10, 0)
-  love.graphics.draw(Akari:getAtlasImage(), 10, 15)
+  local atlas = Akari:getAtlasImage()
+  local w, h = atlas:getDimensions()
+  love.graphics.rectangle('line', 9, 14, w + 2, h + 2)
+  love.graphics.draw(atlas, 10, 15)
   love.graphics.pop()
 end
 
 function demo.draw(title, drawCalls)
   love.graphics.setColor(MED_BLUE)
-  love.graphics.rectangle('fill', 0, 0, 185, 170)
+  love.graphics.rectangle('fill', 0, 0, 185, TOP_HEIGHT)
 
   local drawcallsBefore = love.graphics.getStats().drawcalls
 
@@ -114,4 +119,10 @@ function demo.draw(title, drawCalls)
   local drawcalls = love.graphics.getStats().drawcalls - drawcallsBefore
   love.graphics.print(title, 10, 0)
   love.graphics.print(("Drawcalls: %d"):format(drawcalls), 10, 15)
+end
+
+function love.keypressed(key)
+  if key == 'escape' then
+    love.event.push('quit')
+  end
 end

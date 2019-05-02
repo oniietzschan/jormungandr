@@ -43,21 +43,15 @@ local Akari = require 'jormungandr'()
 local quads, atlasImage
 
 function love.load()
-  -- imageProxy is not a LÖVE Image, but supports methods like :getDimensions(),
-  -- so you should be able to use it with libraries like anim8.
-  local imageProxies = {
-    Akari:newImage('cutie.png'),
-    Akari:newImage('monster.png'),
-    Akari:newImage('weapon.png'),
-  }
-  -- "quad" is a LÖVE Quad.
+  -- Akari:newQuad() returns a LÖVE Quad.
   -- The cordinates will correspond to the relative position of the image inside the atlas.
   quads = {
-    imageProxies[1]:newQuad(0, 0, 16, 32),
-    imageProxies[2]:newQuad(0, 0, 24, 40),
-    imageProxies[3]:newQuad(0, 0, 16, 16),
+    Akari:newQuad('cutie.png',   0, 0, 16, 32),
+    Akari:newQuad('monster.png', 0, 0, 24, 40),
+    Akari:newQuad('weapon.png',  0, 0, 16, 16),
   }
-  -- "atlasImage" is a LÖVE Image. This is your sprite atlas texture.
+  -- Akari:getAtlasImage() returns a LÖVE Image. This is your sprite atlas texture.
+  -- This should only be called after you have created all of your quads.
   atlasImage = Akari:getAtlasImage()
 end
 

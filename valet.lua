@@ -25,29 +25,62 @@ function Space:add(obj, width, height)
   })
 end
 
-function Space:yield()
-  local result = {}
-  for _, t in ipairs(self._objs) do
-    local w, h = t.width, t.height
-    if self._x + w > self._width then
-      self._x = 0
-      self._y = self._nextY
-    end
-    if self._y + h > self._height then
-      error(("Valet space is full, try with larger than %d, %d dimensions."):format(self._width, self._height))
-    end
-
-    table.insert(result, {
-      t.obj,
-      self._x,
-      self._y,
-      w,
-      h,
-    })
-
-    self._x = self._x + w
-    self._nextY = math.max(self._nextY, self._y + h)
+local function sortHeightWidth(a, b)
+  if a.height == b.height then
+    return a.width > b.width
   end
+  return a.height > b.height
+end
+
+local function park(unfilteredObjs, width, height)
+  local objs = unfilteredObjs
+  -- -- Filter down to objects which will fit in width by height.
+  -- local objs = {}
+  -- for _, obj in ipairs(unfilteredObjs) do
+  --   if obj.width <= width and obj.height <= height then
+  --     table.insert(objs, obj)
+  --   end
+  -- end
+
+  -- Sort objects by height, width.
+  table.sort(objs, sortHeightWidth)
+
+  local results = {}
+
+  -- Start going row by row.
+  local x, y, rowH = 0, 0, 0
+  for i, obj in ipairs(objs) do
+    rowH = math.max(rowH, obj.height)
+    if rowH > (height - y) then
+      break -- Unable to contain any more objects here.
+    end
+
+    if obj.width > (width - x) then
+      -- Go to the next row if there's not enough room.
+      x = 0
+      y = y + rowH
+      rowH = 0
+    end
+
+    table.insert(results, {
+      obj.obj,
+      x,
+      y,
+      obj.width,
+      obj.height,
+    })
+    x = x + obj.width
+  end
+
+  return results
+end
+
+function Space:yield()
+  local result = park(self._objs, self._width, self._height)
+  if #result < #self._objs then
+    error(("Valet space is too small, try with larger than %d, %d."):format(self._width, self._height))
+  end
+  self._objs = {} -- Clear objects so that imageData can be freed from memory.
   return result
 end
 
@@ -57,4 +90,3 @@ return function(...)
   return setmetatable({}, SpaceMetatable)
     :initialize(...)
 end
-

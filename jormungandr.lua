@@ -30,10 +30,6 @@ local Jormungandr = {
 function Jormungandr:init(dimensions)
   assert(type(dimensions) == 'number' or dimensions == nil)
   self._dimensions = dimensions or 1024
-  self._x = 0
-  self._y = 0
-  self._nextY = 0
-  self._images = {}
   self._filePathToImageData = {}
   local Valet = require 'valet'
   self._valet = Valet(self._dimensions, self._dimensions)
@@ -44,6 +40,7 @@ function Jormungandr:newQuad(image, x, y, w, h)
     error('newQuad() should be called before getAtlasImage()')
   end
 
+  local imageData
   if type(image) == 'string' then
     if self._filePathToImageData[image] == nil then
       self._filePathToImageData[image] = love.image.newImageData(image)
